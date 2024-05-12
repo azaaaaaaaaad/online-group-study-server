@@ -59,6 +59,14 @@ async function run() {
             res.send(result)
         })
 
+        //delete individual assignment from db
+        app.delete('/assignments/:id', async (req, res) =>{
+            const id = req.params.id
+            const query = {_id: new ObjectId(id)}
+            const result = await assignmentsCollection.deleteOne(query);
+            res.send(result)
+        })
+
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
     }
