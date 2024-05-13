@@ -54,16 +54,37 @@ async function run() {
         //get individual assignment from db
         app.get('/assignments/:id', async (req, res) => {
             const id = req.params.id
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await assignmentsCollection.findOne(query);
             res.send(result)
         })
 
         //delete individual assignment from db
-        app.delete('/assignments/:id', async (req, res) =>{
+        app.delete('/assignments/:id', async (req, res) => {
             const id = req.params.id
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await assignmentsCollection.deleteOne(query);
+            res.send(result)
+        })
+
+        //update individual assignment from db
+        app.put('/assignments/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const assignment = req.body;
+            const options = { upsert: true }
+            const updatedAssignment = {
+                $set: {
+                    title: assignment.title,
+                    description: assignment.description,
+                    marks: assignment.marks,
+                    photo: assignment.photo,
+                    difficultyLevel: assignment.difficultyLevel,
+                    date: assignment.date,
+                }
+            }
+
+            const result = await assignmentsCollection.updateOne(filter, updatedAssignment, options)
             res.send(result)
         })
 
