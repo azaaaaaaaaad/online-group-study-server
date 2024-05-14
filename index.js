@@ -97,6 +97,20 @@ async function run() {
         })
 
         //get all submitted assignment from db
+        app.get('/assignments-submission', async (req, res) => {
+            const result = await assignmentsSubmission.find().toArray()
+            res.send(result)
+        })
+
+        //get all submitted assignment via specific email from db
+        app.get('/assignments-submission', async (req, res) => {
+            // const email = req.params.email;
+            // const query = { 'email': email }
+            const result = await assignmentsSubmission.find().toArray()
+            res.send(result)
+        })
+
+
 
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
