@@ -7,7 +7,7 @@ const port = process.env.PORT || 5000;
 
 //middleware
 const corsOption = {
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173', 'https://group-study-server-henna.vercel.app', 'https://online-group-study-5cb94.web.app'],
     credentials: true,
     optionSuccessStatus: 200,
 }
@@ -30,6 +30,7 @@ async function run() {
     try {
         const featuresCollection = client.db('GroupStudy').collection('feature')
         const assignmentsCollection = client.db('GroupStudy').collection('assignments')
+        const assignmentsSubmission = client.db('GroupStudy').collection('assignments-submission')
 
 
         //get features to homepage from db
@@ -87,6 +88,15 @@ async function run() {
             const result = await assignmentsCollection.updateOne(filter, updatedAssignment, options)
             res.send(result)
         })
+
+        //save assignments submission in db
+        app.post('/assignments-submission', async (req, res) => {
+            const submission = req.body
+            const result = await assignmentsSubmission.insertOne(submission)
+            res.send(result)
+        })
+
+        //get all submitted assignment from db
 
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
