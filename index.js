@@ -16,6 +16,28 @@ const corsOption = {
 
 app.use(cors(corsOption));
 app.use(express.json());
+app.use(cookieParser())
+
+//verify jwt middleware
+// const verifyToken = (req, res, next) => {
+//     console.log('im middleware');
+//     if (!token) {
+//         return res.status(401).send({ message: 'unauthorize access' })
+//     }
+//     const token = req.cookies.token
+//     if (token) {
+//         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+//             if (err) {
+//                 console.log(err);
+//                 return res.status(401).send({ message: 'unauthorize access' })
+//                 //return
+//             }
+//             console.log(decoded);
+//             req.user = decoded
+//             next()
+//         })
+//     }
+// }
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.fdffxhb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -48,6 +70,18 @@ async function run() {
             }).send({ success: true })
         })
 
+        //clear token
+        app.get('/logout', async (req, res) => {
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+                maxAge: 0
+
+            }).send({ success: true })
+        })
+
+
         //get features to homepage from db
         app.get('/feature', async (req, res) => {
             const result = await featuresCollection.find().toArray()
@@ -61,6 +95,7 @@ async function run() {
             const result = await assignmentsCollection.insertOne(assignment)
             res.send(result)
         })
+
         //get assignments from db
         app.get('/assignments', async (req, res) => {
             const result = await assignmentsCollection.find().toArray();
@@ -118,7 +153,9 @@ async function run() {
         })
 
         //get all submitted assignment via specific email from db
-        app.get('/assignments-submission/:email', async (req, res) => {
+        app.get('/assignments-submission/:email', async (req, res) => {  
+            const token = req.cookies.token      
+            console.log(token);
             const email = req.params.email;
             const query = { 'email': email }
             const result = await assignmentsSubmission.find(query).toArray()
