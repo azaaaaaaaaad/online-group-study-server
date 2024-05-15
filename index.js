@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
+const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser')
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -32,6 +34,19 @@ async function run() {
         const assignmentsCollection = client.db('GroupStudy').collection('assignments')
         const assignmentsSubmission = client.db('GroupStudy').collection('assignments-submission')
 
+        //jwt
+        app.post('/jwt', async (req, res) => {
+            const user = req.body
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '7d'
+            })
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+
+            }).send({ success: true })
+        })
 
         //get features to homepage from db
         app.get('/feature', async (req, res) => {
@@ -103,12 +118,19 @@ async function run() {
         })
 
         //get all submitted assignment via specific email from db
-        app.get('/assignments-submission', async (req, res) => {
-            // const email = req.params.email;
-            // const query = { 'email': email }
-            const result = await assignmentsSubmission.find().toArray()
+        app.get('/assignments-submission/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { 'email': email }
+            const result = await assignmentsSubmission.find(query).toArray()
             res.send(result)
         })
+
+
+
+
+
+
+
 
 
 
